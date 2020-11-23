@@ -1,0 +1,6 @@
+<button class="btn btn-primary" (click)="pause()" *ngIf="this.playing; else playBlock">Pause</button>
+<ng-template #playBlock><button class="btn btn-primary" (click)="play()">Play</button></ng-template>
+
+<button class="btn btn-primary" (click)="skip()">Skip</button>
+
+<button (click)="test()">Test</button>
