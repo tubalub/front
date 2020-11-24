@@ -24,7 +24,6 @@
     "@types/socket.io": "^2.1.11",
     "@types/sockjs-client": "^1.5.0",
     "@types/stompjs": "^2.3.4",
-    "aws-sdk": "^2.798.0",
     "bootstrap": "^4.5.3",
     "ng2-stomp-service": "^1.2.2",
     "psl": "^1.8.0",
