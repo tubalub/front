@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { environment } from 'src/environments/environment';
+import { DataService } from '../services/data.service';
 
 @Component({
   selector: 'app-upload',
@@ -11,21 +12,15 @@ export class UploadComponent implements OnInit {
   file = null;
   filename:string;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, public data: DataService) { }
 
   ngOnInit(): void {
   }
 
   async upload() {
     let uploadUrl = await this.getPresignedUrl();
-    console.log(uploadUrl);
-    console.log(this.file.type);
-    console.log(this.file.name)
-    // let fileToUpload = new File([this.file], this.filename);
-    // console.log(fileToUpload);
-    // console.log(fileToUpload.name)
     let resp = await this.http.put(uploadUrl, this.file).toPromise();
-    console.log(resp);
+    this.data.songQ.push(`${environment.S3_BASE_URL}/${this.filename}`);
   }
 
   async getPresignedUrl() {
@@ -33,7 +28,6 @@ export class UploadComponent implements OnInit {
   }
 
   onFileSelected(event) {
-    console.log(event.target.files[0].name);
     this.filename = `${Date.now()}_${event.target.files[0].name}`;
     this.file = event.target.files[0];
   }

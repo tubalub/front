@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  BACKEND_URL : 'localhost:8089/tubalub'
+  BACKEND_URL : 'localhost:8089/tubalub',
+  S3_BASE_URL : 'https://tubalub.s3.amazonaws.com'
 };
 
 /*
