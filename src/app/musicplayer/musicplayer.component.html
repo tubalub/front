@@ -6,8 +6,15 @@
 <button (click)="test()">Test</button>
 
 <table>
-    <tr *ngFor = "let col of this.data.songQ">
-        <td ngIf="this.nowPlaying.source != col; else bold">{{col}}</td>
-        <ng-template #bold><th>{{col}}</th></ng-template>
+    <th>Queue</th>
+    <tr *ngFor = "let row of this.data.songQ">
+        <td>{{row}}</td>
+    </tr>
+</table>
+
+<table>
+    <th>History</th>
+    <tr *ngFor = "let row of this.data.history.slice().reverse()">
+        <td>{{row}}</td>
     </tr>
 </table>
