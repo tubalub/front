@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MusicSyncInfo } from '../models/music-sync-info';
 import { WebsocketService } from '../services/websocket.service'
 import { HostparserService } from '../services/hostparser.service'
+import { DataService } from '../services/data.service'
 
 @Component({
   selector: 'app-musicplayer',
@@ -10,17 +11,9 @@ import { HostparserService } from '../services/hostparser.service'
 })
 export class MusicplayerComponent implements OnInit {
   nowPlaying = new Audio();
-  songQ = [
-    // temporary
-    "https://tubalub.s3.amazonaws.com/123.mp3", 
-    "https://tubalub.s3.amazonaws.com/abc.mp3",
-    "https://www.youtube.com/watch?v=grng80hJM5A"
-  ];
-  history = [];
   playing = false;
-  index = 0;
 
-  constructor(private wsService: WebsocketService, private parser: HostparserService) {}
+  constructor(private wsService: WebsocketService, private parser: HostparserService, public data: DataService) {}
 
   ngOnInit(): void {
     this.nowPlaying.addEventListener("ended", () => {
@@ -32,8 +25,8 @@ export class MusicplayerComponent implements OnInit {
   play(): void {
     this.playing = !this.playing
     if (!this.nowPlaying.src) {
-      let link = this.songQ.shift();
-      this.history.push(link);
+      let link = this.data.songQ.shift();
+      this.data.history.push(link);
       let source = this.parser.getSource(link);
       if (source == "FILE") {
         this.nowPlaying.src = link;
@@ -52,32 +45,28 @@ export class MusicplayerComponent implements OnInit {
   }
 
   skip(): void {
-    let source = this.songQ.shift()
-    this.history.push(source);
+    let source = this.data.songQ.shift()
+    this.data.history.push(source);
     if (source) {
       this.nowPlaying.src = source
       this.nowPlaying.play()
     };
-    this.index++;
     this.wsService.send(this.createSyncInfo());
   }
 
   createSyncInfo(): MusicSyncInfo {
-    return new MusicSyncInfo(this.songQ[this.index], this.index, this.playing, this.songQ, this.history);
+    return new MusicSyncInfo(this.nowPlaying.currentTime, this.playing, this.data.songQ, this.data.history);
   } 
 
   test() {
-    console.log("songQ:" + this.songQ);
-    console.log("index:" + this.index);
-    console.log("history:" + this.history);
-    console.log(this.songQ[this.index]);
-    this.parser.getSource(this.songQ[this.index]);
+    console.log("songQ:" + this.data.songQ);
+    console.log("history:" + this.data.history);
     this.wsService.test();
   }
 
-  add(link: string): void {
-    this.songQ.push(link)
+  // add(link: string): void {
+  //   this.data.songQ.push(link)
 
-    console.log(this.songQ)
-  }
+  //   console.log(this.data.songQ)
+  // }
 }

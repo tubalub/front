@@ -1,17 +1,13 @@
 export class MusicSyncInfo {
 
-    link:string;
-    index: number;
     time: number;
     playing:boolean = false;
     songQ:string[] = [];
     history:string[] = [];
 
-    constructor(link:string, index:number, playing: boolean, songQ:string[], history:string[]) {
-        this.link = link;
-        this.index = index;
+    constructor(time:number, playing: boolean, songQ:string[], history:string[]) {
         this.playing = playing;
-        this.time = Date.now();
+        this.time = time;
         this.songQ = songQ;
         this.history = history;
     }
