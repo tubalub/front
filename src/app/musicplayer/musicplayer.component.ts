@@ -3,6 +3,8 @@ import { MusicSyncInfo } from '../models/music-sync-info';
 import { WebsocketService } from '../services/websocket.service'
 import { HostparserService } from '../services/hostparser.service'
 import { DataService } from '../services/data.service'
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-musicplayer',
@@ -11,62 +13,71 @@ import { DataService } from '../services/data.service'
 })
 export class MusicplayerComponent implements OnInit {
   nowPlaying = new Audio();
-  playing = false;
 
-  constructor(private wsService: WebsocketService, private parser: HostparserService, public data: DataService) {}
+  constructor(private wsService: WebsocketService, private parser: HostparserService, public data: DataService, private http: HttpClient) {}
 
   ngOnInit(): void {
+    this.initSync();
+    console.log(this.data.syncInfo);
     this.nowPlaying.addEventListener("ended", () => {
       this.nowPlaying.currentTime = 0;
-      this.skip();
-    })
+      this.next();
+    });
+    this.wsService.syncInfo.subscribe((sync) => {
+      this.onChange(sync);
+    });
+    this.nowPlaying.play();
   }
 
-  play(): void {
-    this.playing = !this.playing
-    if (!this.nowPlaying.src) {
-      let link = this.data.songQ.shift();
-      this.data.history.push(link);
-      let source = this.parser.getSource(link);
-      if (source == "FILE") {
-        this.nowPlaying.src = link;
-        this.nowPlaying.load();
-        this.nowPlaying.play();
-      } 
-    } 
-    this.wsService.send(this.createSyncInfo());
+  async initSync() {
+    this.data.syncInfo = await this.http.get<MusicSyncInfo>(`http://${environment.BACKEND_URL}/sync`).toPromise();
   }
 
-  pause(): void {
-    this.playing = !this.playing
-    this.nowPlaying.pause()
-    console.log("playing = " + this.playing);
-    this.wsService.send(this.createSyncInfo());
+  // play(): void {
+  //   if (!this.nowPlaying.src) {
+  //     let link = this.data.syncInfo.songQ.shift();
+  //     this.data.syncInfo.history.push(link);
+  //     let source = this.parser.getSource(link);
+  //     if (source == "FILE") {
+  //       this.nowPlaying.src = link;
+  //       this.nowPlaying.load();
+  //       this.nowPlaying.play();
+  //     } 
+  //   } 
+  //   this.updateBackend();
+  // }
+
+  skip() {
+    this.nowPlaying.pause();
+    this.nowPlaying = new Audio();
+    this.next();
   }
 
-  skip(): void {
-    let source = this.data.songQ.shift()
-    this.data.history.push(source);
+  next(): void {
+    this.data.syncInfo.history.push(this.data.syncInfo.songQ.shift());
+    let source = this.data.syncInfo.songQ[0];
     if (source) {
       this.nowPlaying.src = source
       this.nowPlaying.play()
     };
-    this.wsService.send(this.createSyncInfo());
+    this.updateBackend();
   }
 
-  createSyncInfo(): MusicSyncInfo {
-    return new MusicSyncInfo(this.nowPlaying.currentTime, this.playing, this.data.songQ, this.data.history);
-  } 
-
-  test() {
-    console.log("songQ:" + this.data.songQ);
-    console.log("history:" + this.data.history);
-    this.wsService.test();
+  onChange(sync: MusicSyncInfo) {
+    this.data.syncInfo = sync;
+    console.log("Now playing source: " + this.nowPlaying.src);
+    console.log(this.data.syncInfo);
+    if (!this.nowPlaying.src) {
+      console.log("Playing...")
+      this.nowPlaying.src = sync.songQ[0];
+      this.nowPlaying.currentTime = sync.time;
+      this.nowPlaying.play();
+    }
   }
 
-  // add(link: string): void {
-  //   this.data.songQ.push(link)
-
-  //   console.log(this.data.songQ)
-  // }
+  updateBackend() {
+    this.data.syncInfo.time = this.nowPlaying.currentTime;
+    console.log(this.data.syncInfo);
+    this.wsService.send(this.data.syncInfo);
+  }
 }

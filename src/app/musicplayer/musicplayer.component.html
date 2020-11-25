@@ -1,20 +1,16 @@
-<button class="btn btn-primary" (click)="pause()" *ngIf="this.playing; else playBlock">Pause</button>
-<ng-template #playBlock><button class="btn btn-primary" (click)="play()">Play</button></ng-template>
-
+<!-- <button class="btn btn-primary" (click)="play()">Play</button> -->
 <button class="btn btn-primary" (click)="skip()">Skip</button>
-
-<button (click)="test()">Test</button>
 
 <table>
     <th>Queue</th>
-    <tr *ngFor = "let row of this.data.songQ">
+    <tr *ngFor = "let row of this.data.syncInfo.songQ">
         <td>{{row}}</td>
     </tr>
 </table>
 
 <table>
     <th>History</th>
-    <tr *ngFor = "let row of this.data.history.slice().reverse()">
+    <tr *ngFor = "let row of this.data.syncInfo.history.slice().reverse()">
         <td>{{row}}</td>
     </tr>
 </table>

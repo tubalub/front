@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { DataService } from '../services/data.service';
+import { WebsocketService } from '../services/websocket.service';
 
 @Component({
   selector: 'app-upload',
@@ -12,7 +13,7 @@ export class UploadComponent implements OnInit {
   file = null;
   filename:string;
 
-  constructor(private http: HttpClient, public data: DataService) { }
+  constructor(private http: HttpClient, public data: DataService, private wsService: WebsocketService) { }
 
   ngOnInit(): void {
   }
@@ -20,7 +21,8 @@ export class UploadComponent implements OnInit {
   async upload() {
     let uploadUrl = await this.getPresignedUrl();
     let resp = await this.http.put(uploadUrl, this.file).toPromise();
-    this.data.songQ.push(`${environment.S3_BASE_URL}/${this.filename}`);
+    this.data.syncInfo.songQ.push(`${environment.S3_BASE_URL}/${this.filename}`);
+    this.wsService.send(this.data.syncInfo);
   }
 
   async getPresignedUrl() {

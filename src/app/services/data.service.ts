@@ -1,19 +1,12 @@
 import { Injectable } from '@angular/core';
+import { MusicSyncInfo } from '../models/music-sync-info';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
 
-  // public songQ:string[] = [];
-  // public history:string[] = [];
-  songQ = [
-    // temporary
-    "https://tubalub.s3.amazonaws.com/123.mp3", 
-    "https://tubalub.s3.amazonaws.com/abc.mp3",
-    "https://www.youtube.com/watch?v=grng80hJM5A"
-  ];
-  history = [];
+  public syncInfo = new MusicSyncInfo(0, [], []);
 
   constructor() { }
 }
