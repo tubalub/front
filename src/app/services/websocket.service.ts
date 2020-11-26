@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CompatClient } from '@stomp/stompjs/esm6/compatibility/compat-client';
 import { Stomp } from '@stomp/stompjs/esm6/compatibility/stomp';
-import { Observable, of, Subject } from "rxjs";
+import { Subject } from "rxjs";
 import { environment } from '../../environments/environment';
 import { MusicSyncInfo } from '..//models/music-sync-info';
 import { DataService } from './data.service';
@@ -11,8 +11,8 @@ import { DataService } from './data.service';
 })
 export class WebsocketService {
 
-  public syncInfo = new Subject<MusicSyncInfo>();
   stompClient: CompatClient;
+  syncInfo = new Subject<MusicSyncInfo>();
 
   constructor(private data:DataService) { 
     this.initConnection();

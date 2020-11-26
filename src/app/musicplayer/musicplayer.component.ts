@@ -26,11 +26,18 @@ export class MusicplayerComponent implements OnInit {
     this.wsService.syncInfo.subscribe((sync) => {
       this.onChange(sync);
     });
-    this.nowPlaying.play();
+
   }
 
   async initSync() {
     this.data.syncInfo = await this.http.get<MusicSyncInfo>(`http://${environment.BACKEND_URL}/sync`).toPromise();
+    console.log("sync info from server:" + this.data.syncInfo);
+    let currentSong = this.data.syncInfo.songQ[0];
+    console.log(currentSong);
+    if (currentSong) {
+      this.nowPlaying.src = currentSong;
+      this.nowPlaying.play();
+    }
   }
 
   // play(): void {
@@ -48,26 +55,28 @@ export class MusicplayerComponent implements OnInit {
   // }
 
   skip() {
-    this.nowPlaying.pause();
-    this.nowPlaying = new Audio();
+    // this.nowPlaying.pause();
+    // this.nowPlaying.src = null;
+    // console.log("inside skip:" + this.nowPlaying.src)
     this.next();
   }
 
   next(): void {
-    this.data.syncInfo.history.push(this.data.syncInfo.songQ.shift());
     let source = this.data.syncInfo.songQ[0];
     if (source) {
+      this.data.syncInfo.history.push(this.data.syncInfo.songQ.shift());
       this.nowPlaying.src = source
       this.nowPlaying.play()
-    };
-    this.updateBackend();
+      this.updateBackend();
+    }
   }
 
   onChange(sync: MusicSyncInfo) {
     this.data.syncInfo = sync;
     console.log("Now playing source: " + this.nowPlaying.src);
+    console.log(this.nowPlaying);
     console.log(this.data.syncInfo);
-    if (!this.nowPlaying.src) {
+    if (this.nowPlaying.src != this.data.syncInfo.songQ[0] && this.data.syncInfo.songQ) {
       console.log("Playing...")
       this.nowPlaying.src = sync.songQ[0];
       this.nowPlaying.currentTime = sync.time;
@@ -79,5 +88,19 @@ export class MusicplayerComponent implements OnInit {
     this.data.syncInfo.time = this.nowPlaying.currentTime;
     console.log(this.data.syncInfo);
     this.wsService.send(this.data.syncInfo);
+  }
+
+  toggleMute() {
+    this.nowPlaying.muted = !this.nowPlaying.muted;
+    console.log("Mute=" + this.nowPlaying.muted);
+  }
+
+  // for testing
+  printNP() {
+    console.log(this.nowPlaying);
+  }
+
+  printSyncInfo() {
+    console.log(this.data.syncInfo);
   }
 }
