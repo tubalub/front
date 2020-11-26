@@ -1,8 +1,8 @@
 <!-- <button class="btn btn-primary" (click)="play()">Play</button> -->
 <button class="btn btn-primary" (click)="skip()">Skip</button>
-<button (click)="printNP()">Print NP</button>
-<button (click)="toggleMute()">Mute</button>
-<button (click)="printSyncInfo()">Get Sync Info</button>
+<button [innerHTML]='this.nowPlaying.muted ? "Unmute" : "Mute"' (click)="toggleMute()"></button>
+
+<span>Current time: {{this.timeString}}</span>
 
 <table>
     <th>Queue</th>
@@ -17,3 +17,4 @@
         <td>{{row}}</td>
     </tr>
 </table>
+<app-upload></app-upload>
