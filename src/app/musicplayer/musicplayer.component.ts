@@ -13,12 +13,12 @@ import { environment } from 'src/environments/environment';
 })
 export class MusicplayerComponent implements OnInit {
   nowPlaying = new Audio();
+  timeString = "00:00.0";
 
   constructor(private wsService: WebsocketService, private parser: HostparserService, public data: DataService, private http: HttpClient) {}
 
   ngOnInit(): void {
     this.initSync();
-    console.log(this.data.syncInfo);
     this.nowPlaying.addEventListener("ended", () => {
       this.nowPlaying.currentTime = 0;
       this.next();
@@ -26,38 +26,20 @@ export class MusicplayerComponent implements OnInit {
     this.wsService.syncInfo.subscribe((sync) => {
       this.onChange(sync);
     });
-
+    setInterval(() => {this.timeUpdater(this.nowPlaying)}, 100);
   }
 
   async initSync() {
     this.data.syncInfo = await this.http.get<MusicSyncInfo>(`http://${environment.BACKEND_URL}/sync`).toPromise();
-    console.log("sync info from server:" + this.data.syncInfo);
     let currentSong = this.data.syncInfo.songQ[0];
-    console.log(currentSong);
     if (currentSong) {
       this.nowPlaying.src = currentSong;
+      this.nowPlaying.currentTime = this.data.syncInfo.time;
       this.nowPlaying.play();
     }
   }
 
-  // play(): void {
-  //   if (!this.nowPlaying.src) {
-  //     let link = this.data.syncInfo.songQ.shift();
-  //     this.data.syncInfo.history.push(link);
-  //     let source = this.parser.getSource(link);
-  //     if (source == "FILE") {
-  //       this.nowPlaying.src = link;
-  //       this.nowPlaying.load();
-  //       this.nowPlaying.play();
-  //     } 
-  //   } 
-  //   this.updateBackend();
-  // }
-
   skip() {
-    // this.nowPlaying.pause();
-    // this.nowPlaying.src = null;
-    // console.log("inside skip:" + this.nowPlaying.src)
     this.next();
   }
 
@@ -73,11 +55,7 @@ export class MusicplayerComponent implements OnInit {
 
   onChange(sync: MusicSyncInfo) {
     this.data.syncInfo = sync;
-    console.log("Now playing source: " + this.nowPlaying.src);
-    console.log(this.nowPlaying);
-    console.log(this.data.syncInfo);
     if (this.nowPlaying.src != this.data.syncInfo.songQ[0] && this.data.syncInfo.songQ) {
-      console.log("Playing...")
       this.nowPlaying.src = sync.songQ[0];
       this.nowPlaying.currentTime = sync.time;
       this.nowPlaying.play();
@@ -86,21 +64,19 @@ export class MusicplayerComponent implements OnInit {
 
   updateBackend() {
     this.data.syncInfo.time = this.nowPlaying.currentTime;
-    console.log(this.data.syncInfo);
     this.wsService.send(this.data.syncInfo);
   }
 
   toggleMute() {
     this.nowPlaying.muted = !this.nowPlaying.muted;
-    console.log("Mute=" + this.nowPlaying.muted);
   }
 
-  // for testing
-  printNP() {
-    console.log(this.nowPlaying);
+  timeUpdater(audio) {
+    if (audio.src) {
+      let time = new Date(0);
+      time.setMilliseconds(this.nowPlaying.currentTime*1000);
+      this.timeString = time.toISOString().substr(14,7);
+    }
   }
 
-  printSyncInfo() {
-    console.log(this.data.syncInfo);
-  }
 }

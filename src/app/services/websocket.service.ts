@@ -25,7 +25,6 @@ export class WebsocketService {
     this.stompClient.connect({}, frame => {
       this.stompClient.subscribe('/topic/music', message => {
         if (message.body) {
-          console.log("Response:" + message.body);
           this.syncInfo.next(JSON.parse(message.body));
         }
       })
