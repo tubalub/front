@@ -20,9 +20,16 @@ export class UploadComponent implements OnInit {
 
   async upload() {
     let uploadUrl = await this.getPresignedUrl();
-    let resp = await this.http.put(uploadUrl, this.file).toPromise();
-    this.data.syncInfo.songQ.push(`${environment.S3_BASE_URL}/uploads/${this.filename}`);
-    this.wsService.send(this.data.syncInfo);
+    this.http.put(uploadUrl, this.file, {observe: 'response'}).subscribe(resp => {
+      console.log(resp.status);
+      if(Math.floor(resp.status / 100) == 2) {
+        this.data.syncInfo.songQ.push(`${environment.S3_BASE_URL}/uploads/${this.filename}`);
+        this.wsService.send(this.data.syncInfo);
+      } else {
+        alert("Problem during file upload");
+      }
+    })
+
   }
 
   async getPresignedUrl() {
@@ -31,6 +38,7 @@ export class UploadComponent implements OnInit {
 
   onFileSelected(event) {
     this.filename = `${Date.now()}_${event.target.files[0].name}`;
+    this.filename = this.filename.replace(/\s/g,'_')
     this.file = event.target.files[0];
   }
 

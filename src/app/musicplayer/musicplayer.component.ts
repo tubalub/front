@@ -55,7 +55,7 @@ export class MusicplayerComponent implements OnInit {
 
   onChange(sync: MusicSyncInfo) {
     this.data.syncInfo = sync;
-    if (this.nowPlaying.src != this.data.syncInfo.songQ[0] && this.data.syncInfo.songQ) {
+    if (decodeURIComponent(this.nowPlaying.src) != this.data.syncInfo.songQ[0] && this.data.syncInfo.songQ) {
       this.nowPlaying.src = sync.songQ[0];
       this.nowPlaying.currentTime = sync.time;
       this.nowPlaying.play();
