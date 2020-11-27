@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { MusicSyncInfo } from '../models/music-sync-info';
 import { WebsocketService } from '../services/websocket.service'
 import { HostparserService } from '../services/hostparser.service'
 import { DataService } from '../services/data.service'
+import { UserService } from '../services/user.service'
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-import { UploadComponent } from '../upload/upload.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-musicplayer',
@@ -16,9 +17,18 @@ export class MusicplayerComponent implements OnInit {
   nowPlaying = new Audio();
   timeString = "00:00.0";
 
-  constructor(private wsService: WebsocketService, private parser: HostparserService, public data: DataService, private http: HttpClient) {}
+  constructor(private wsService: WebsocketService, 
+    private parser: HostparserService, 
+    public data: DataService, 
+    private http: HttpClient,
+    private userService: UserService,
+    private router: Router) {}
 
-  ngOnInit(): void {
+  async ngOnInit() {
+    if (!(await this.userService.validateUser())) {
+      alert("Invalid user");
+      this.router.navigate(['login']);
+    }
     this.initSync();
     this.nowPlaying.addEventListener("ended", () => {
       this.nowPlaying.currentTime = 0;
@@ -83,6 +93,17 @@ export class MusicplayerComponent implements OnInit {
       time.setMilliseconds(this.nowPlaying.currentTime*1000);
       this.timeString = time.toISOString().substr(14,7);
     }
+  }
+
+  @HostListener('window:unload', [ '$event' ])
+  beforeUnloadHandler(event) {
+    let user = sessionStorage.getItem('user');
+    // need to make synchronous http request here directly using xhr
+    // httpclient doesn't seem to work
+    let xhr = new XMLHttpRequest();
+    xhr.open("DELETE", `http://${environment.BACKEND_URL}/user/${user}`);
+    xhr.send();
+    alert("Closing");
   }
 
 }

@@ -7,6 +7,7 @@ import { UploadComponent } from './upload/upload.component';
 import { HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './login/login.component';
 import { FormsModule } from '@angular/forms';
+import { LobbyComponent } from './lobby/lobby.component';
 
 @NgModule({
   declarations: [
@@ -14,6 +15,7 @@ import { FormsModule } from '@angular/forms';
     MusicplayerComponent,
     UploadComponent,
     LoginComponent,
+    LobbyComponent,
   ],
   imports: [
     BrowserModule,

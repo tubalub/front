@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CompatClient } from '@stomp/stompjs/esm6/compatibility/compat-client';
 import { Stomp } from '@stomp/stompjs/esm6/compatibility/stomp';
@@ -14,7 +15,7 @@ export class WebsocketService {
   stompClient: CompatClient;
   syncInfo = new Subject<MusicSyncInfo>();
 
-  constructor(private data:DataService) { 
+  constructor(private data:DataService, private http:HttpClient) { 
     this.initConnection();
   }
 
@@ -27,7 +28,7 @@ export class WebsocketService {
         if (message.body) {
           this.syncInfo.next(JSON.parse(message.body));
         }
-      })
+      });
     });
   }
 
