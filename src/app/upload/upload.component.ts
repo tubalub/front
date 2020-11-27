@@ -21,7 +21,7 @@ export class UploadComponent implements OnInit {
   async upload() {
     let uploadUrl = await this.getPresignedUrl();
     let resp = await this.http.put(uploadUrl, this.file).toPromise();
-    this.data.syncInfo.songQ.push(`${environment.S3_BASE_URL}/${this.filename}`);
+    this.data.syncInfo.songQ.push(`${environment.S3_BASE_URL}/uploads/${this.filename}`);
     this.wsService.send(this.data.syncInfo);
   }
 
