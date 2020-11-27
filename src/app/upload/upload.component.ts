@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { environment } from 'src/environments/environment';
+import { MusicplayerComponent } from '../musicplayer/musicplayer.component';
 import { DataService } from '../services/data.service';
 import { WebsocketService } from '../services/websocket.service';
 
@@ -13,7 +14,7 @@ export class UploadComponent implements OnInit {
   file = null;
   filename:string;
 
-  constructor(private http: HttpClient, public data: DataService, private wsService: WebsocketService) { }
+  constructor(private http: HttpClient, public data: DataService, private wsService: WebsocketService, private musicPlayer:MusicplayerComponent) { }
 
   ngOnInit(): void {
   }
@@ -21,9 +22,9 @@ export class UploadComponent implements OnInit {
   async upload() {
     let uploadUrl = await this.getPresignedUrl();
     this.http.put(uploadUrl, this.file, {observe: 'response'}).subscribe(resp => {
-      console.log(resp.status);
       if(Math.floor(resp.status / 100) == 2) {
         this.data.syncInfo.songQ.push(`${environment.S3_BASE_URL}/uploads/${this.filename}`);
+        this.data.syncInfo.time = this.musicPlayer.nowPlaying.currentTime;
         this.wsService.send(this.data.syncInfo);
       } else {
         alert("Problem during file upload");

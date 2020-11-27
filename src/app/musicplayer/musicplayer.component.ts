@@ -5,6 +5,7 @@ import { HostparserService } from '../services/hostparser.service'
 import { DataService } from '../services/data.service'
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
+import { UploadComponent } from '../upload/upload.component';
 
 @Component({
   selector: 'app-musicplayer',
@@ -55,7 +56,7 @@ export class MusicplayerComponent implements OnInit {
 
   onChange(sync: MusicSyncInfo) {
     this.data.syncInfo = sync;
-    if (decodeURIComponent(this.nowPlaying.src) != this.data.syncInfo.songQ[0] && this.data.syncInfo.songQ) {
+    if (this.data.syncInfo.songQ[0] && decodeURIComponent(this.nowPlaying.src) != this.data.syncInfo.songQ[0]) {
       this.nowPlaying.src = sync.songQ[0];
       this.nowPlaying.currentTime = sync.time;
       this.nowPlaying.play();
