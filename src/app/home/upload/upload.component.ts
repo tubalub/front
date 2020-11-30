@@ -1,9 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { MusicplayerComponent } from '../musicplayer/musicplayer.component';
-import { DataService } from '../services/data.service';
-import { WebsocketService } from '../services/websocket.service';
+import { DataService } from '../../services/data.service';
+import { WebsocketService } from '../../services/websocket.service';
 
 @Component({
   selector: 'app-upload',
