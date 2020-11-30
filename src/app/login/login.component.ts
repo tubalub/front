@@ -1,8 +1,5 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { environment } from 'src/environments/environment';
-import { DataService } from '../services/data.service';
 import { UserService } from '../services/user.service';
 
 @Component({
@@ -14,7 +11,7 @@ export class LoginComponent implements OnInit {
 
   username:string = null;
 
-  constructor(private router:Router, private userService:UserService, private data:DataService, private http: HttpClient) { }
+  constructor(private router:Router, private userService:UserService) { }
 
   ngOnInit(): void {
   }

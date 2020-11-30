@@ -13,9 +13,8 @@ import { DataService } from './data.service';
 export class WebsocketService {
 
   stompClient: CompatClient;
-  syncInfo = new Subject<MusicSyncInfo>();
 
-  constructor(private data:DataService, private http:HttpClient) { 
+  constructor(private data:DataService) { 
     this.initConnection();
   }
 
@@ -26,14 +25,23 @@ export class WebsocketService {
     this.stompClient.connect({}, frame => {
       this.stompClient.subscribe('/topic/music', message => {
         if (message.body) {
-          this.syncInfo.next(JSON.parse(message.body));
+          this.data.musicSubj.next(JSON.parse(message.body));
         }
       });
+      this.stompClient.subscribe('/topic/users', message => {
+        if (message.body) {
+          this.data.userSubj.next(JSON.parse(message.body));
+        }
+      })
     });
   }
 
-  send(msg: MusicSyncInfo) {
+  sendMusicInfo(msg: MusicSyncInfo) {
     this.stompClient.send('/app/update', {}, JSON.stringify(msg));
+  }
+
+  sendUserInfo(msg: string[]) {
+    this.stompClient.send('/app/users',{}, JSON.stringify(msg));
   }
 
 }

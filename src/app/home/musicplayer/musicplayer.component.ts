@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MusicSyncInfo } from '../../models/music-sync-info';
 import { WebsocketService } from '../../services/websocket.service'
 import { HostparserService } from '../../services/hostparser.service'
@@ -34,7 +34,7 @@ export class MusicplayerComponent implements OnInit {
       this.nowPlaying.currentTime = 0;
       this.next();
     });
-    this.wsService.syncInfo.subscribe((sync) => {
+    this.data.musicSubj.subscribe((sync) => {
       this.onChange(sync);
     });
     setInterval(() => {this.timeUpdater(this.nowPlaying)}, 100);
@@ -65,7 +65,6 @@ export class MusicplayerComponent implements OnInit {
   }
 
   onChange(sync: MusicSyncInfo) {
-    this.data.syncInfo = sync;
     // edge case when last song finishes playing
     if (this.data.syncInfo.songQ.length == 0) {
       this.nowPlaying.src = undefined;
@@ -80,7 +79,7 @@ export class MusicplayerComponent implements OnInit {
 
   updateBackend() {
     this.data.syncInfo.time = this.nowPlaying.currentTime;
-    this.wsService.send(this.data.syncInfo);
+    this.wsService.sendMusicInfo(this.data.syncInfo);
   }
 
   toggleMute() {
@@ -93,17 +92,6 @@ export class MusicplayerComponent implements OnInit {
       time.setMilliseconds(this.nowPlaying.currentTime*1000);
       this.timeString = time.toISOString().substr(14,7);
     }
-  }
-
-  @HostListener('window:unload', [ '$event' ])
-  beforeUnloadHandler(event) {
-    let user = sessionStorage.getItem('user');
-    // need to make synchronous http request here directly using xhr
-    // httpclient doesn't seem to work
-    let xhr = new XMLHttpRequest();
-    xhr.open("DELETE", `http://${environment.BACKEND_URL}/user/${user}`);
-    xhr.send();
-    alert("Closing");
   }
 
 }
