@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { DataService } from '../services/data.service';
+import { DataService } from '../../services/data.service';
 
 @Component({
   selector: 'app-lobby',
@@ -8,7 +8,7 @@ import { DataService } from '../services/data.service';
 })
 export class LobbyComponent implements OnInit {
 
-  constructor(private data:DataService) { }
+  constructor(public data:DataService) { }
 
   ngOnInit(): void {
   }

@@ -1,9 +1,9 @@
 import { Component, HostListener, OnInit } from '@angular/core';
-import { MusicSyncInfo } from '../models/music-sync-info';
-import { WebsocketService } from '../services/websocket.service'
-import { HostparserService } from '../services/hostparser.service'
-import { DataService } from '../services/data.service'
-import { UserService } from '../services/user.service'
+import { MusicSyncInfo } from '../../models/music-sync-info';
+import { WebsocketService } from '../../services/websocket.service'
+import { HostparserService } from '../../services/hostparser.service'
+import { DataService } from '../../services/data.service'
+import { UserService } from '../../services/user.service'
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
