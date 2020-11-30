@@ -56,7 +56,12 @@ export class MusicplayerComponent implements OnInit {
 
   onChange(sync: MusicSyncInfo) {
     this.data.syncInfo = sync;
-    if (this.data.syncInfo.songQ[0] && decodeURIComponent(this.nowPlaying.src) != this.data.syncInfo.songQ[0]) {
+    // edge case when last song finishes playing
+    if (this.data.syncInfo.songQ.length == 0) {
+      this.nowPlaying.src = undefined;
+      this.nowPlaying.currentTime = 0;
+    // otherwise, if we need to switch songs
+    } else if (decodeURIComponent(this.nowPlaying.src) != this.data.syncInfo.songQ[0]) {
       this.nowPlaying.src = sync.songQ[0];
       this.nowPlaying.currentTime = sync.time;
       this.nowPlaying.play();
