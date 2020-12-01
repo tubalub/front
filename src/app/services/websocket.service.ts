@@ -12,8 +12,9 @@ import { UserService } from './user.service';
 export class WebsocketService {
 
   stompClient: CompatClient;
+  ws:WebSocket;
 
-  constructor(private data:DataService, private userService: UserService) { 
+  constructor(private data:DataService) { 
   }
 
   initConnection(username:string): WebSocket {
@@ -31,8 +32,6 @@ export class WebsocketService {
           this.data.userSubj.next(JSON.parse(message.body));
         }
       });
-      this.data.userList.push(username);
-      this.data.userList.sort();
     });
     return ws;
   }
