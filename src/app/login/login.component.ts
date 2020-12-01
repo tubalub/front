@@ -20,8 +20,9 @@ export class LoginComponent implements OnInit {
   async login() {
     if (this.username) {
       sessionStorage.setItem('user',this.username);
-      let userlist = this.userService.getUserList();
-      if(!(await userlist).includes(this.username)) {
+      let userlist = await this.userService.getUserList();
+      if(!userlist.includes(this.username)) {
+        console.log("userlist in login:"+userlist);
         let ws = this.wsService.initConnection(this.username);
         this.navigateWhenReady(ws);
       } else {

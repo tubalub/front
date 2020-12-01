@@ -12,6 +12,8 @@ export class UserService {
 
   validateUser(): boolean {
     let user = sessionStorage.getItem('user');
+    console.log("user:"+user);
+    console.log("list:"+this.data.userList);
     if (user && this.data.userList.includes(user)) {
       return true;
     }

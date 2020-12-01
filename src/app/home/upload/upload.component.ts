@@ -37,8 +37,20 @@ export class UploadComponent implements OnInit {
 
   onFileSelected(event) {
     this.filename = `${Date.now()}_${event.target.files[0].name}`;
-    this.filename = this.filename.replace(/\s/g,'_')
+    this.filename = this.sanitizeFilename(this.filename);
     this.file = event.target.files[0];
+    console.log("this.filename: " + this.filename);
+  }
+
+  sanitizeFilename(input:string): string {
+    let ret = input;
+    // replace spaces with underscores
+    ret = ret.replace(/\s/g,'_');
+
+    // remove characters for S3
+    ret = ret.replace(/\{|\}|\^|\%|\`|\[|\]|\"|<|>|\~|\#|\||\@|\&/g,'');
+    console.log("ret: " + ret);
+    return ret;
   }
 
 }
