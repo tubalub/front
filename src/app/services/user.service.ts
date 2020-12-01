@@ -12,10 +12,7 @@ export class UserService {
 
   async validateUser() {
     let user = sessionStorage.getItem('user');
-    await this.getUserList();
-    console.log("user:"+user);
-    console.log("list:"+this.data.userList);
-    if (user && this.data.userList.includes(user)) {
+    if (user && (await this.getUserList()).includes(user)) {
       return true;
     }
     return false;

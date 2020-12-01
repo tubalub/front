@@ -32,6 +32,7 @@ export class WebsocketService {
           this.data.userSubj.next(JSON.parse(message.body));
         }
       });
+      this.stompClient.send('/app/users',{},username);
     });
     return ws;
   }
