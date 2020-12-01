@@ -18,7 +18,7 @@ export class DataService {
       this.syncInfo = syncInfo;
     });
     this.userSubj.subscribe((userList) => {
-      this.userList = userList;
+      this.userList = userList.sort();
     })
   }
 }
