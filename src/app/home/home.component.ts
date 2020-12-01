@@ -1,5 +1,7 @@
 import { Component, HostListener, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
+import { UserService } from '../services/user.service';
 
 @Component({
   selector: 'app-home',
@@ -8,19 +10,13 @@ import { environment } from 'src/environments/environment';
 })
 export class HomeComponent implements OnInit {
 
-  constructor() { }
+  constructor(private userService: UserService, private router:Router) { }
 
-  ngOnInit(): void {
-  }
-
-  @HostListener('window:beforeunload', [ '$event' ])
-  beforeUnloadHandler(event) {
-    let user = sessionStorage.getItem('user');
-    // need to make synchronous http request here directly using xhr
-    // httpclient doesn't seem to work
-    let xhr = new XMLHttpRequest();
-    xhr.open("DELETE", `http://${environment.BACKEND_URL}/user/${user}`);
-    xhr.send();
+  async ngOnInit() {
+    if (!(this.userService.validateUser())) {
+      alert("Invalid user");
+      this.router.navigate(['login']);
+    }
   }
 
 }

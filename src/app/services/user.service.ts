@@ -10,22 +10,8 @@ import { WebsocketService } from './websocket.service';
 export class UserService {
   constructor(private data: DataService, private http: HttpClient) {}
 
-  async addUser(username: string): Promise<boolean> {
-    sessionStorage.setItem('user', username);
-    try {
-      let userList: string[] = await this.http
-        .put<string[]>(`http://${environment.BACKEND_URL}/user`, username)
-        .toPromise();
-      this.data.userList = userList;
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
-  async validateUser(): Promise<boolean> {
+  validateUser(): boolean {
     let user = sessionStorage.getItem('user');
-    await this.getUserList();
     if (user && this.data.userList.includes(user)) {
       return true;
     }

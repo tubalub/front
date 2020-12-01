@@ -20,15 +20,9 @@ export class MusicplayerComponent implements OnInit {
   constructor(private wsService: WebsocketService, 
     private parser: HostparserService, 
     public data: DataService, 
-    private http: HttpClient,
-    private userService: UserService,
-    private router: Router) {}
+    private http: HttpClient) {}
 
   async ngOnInit() {
-    if (!(await this.userService.validateUser())) {
-      alert("Invalid user");
-      this.router.navigate(['login']);
-    }
     this.initSync();
     this.nowPlaying.addEventListener("ended", () => {
       this.nowPlaying.currentTime = 0;
