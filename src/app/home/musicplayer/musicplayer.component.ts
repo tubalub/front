@@ -16,6 +16,8 @@ import { Router } from '@angular/router';
 export class MusicplayerComponent implements OnInit {
   nowPlaying = new Audio();
   timeString = "00:00.0";
+  host = null;
+  apiLoaded = false;
 
   constructor(private wsService: WebsocketService, 
     private parser: HostparserService, 
@@ -24,6 +26,14 @@ export class MusicplayerComponent implements OnInit {
 
   async ngOnInit() {
     this.initSync();
+    if (!this.apiLoaded) {
+      // This code loads the IFrame Player API code asynchronously, according to the instructions at
+      // https://developers.google.com/youtube/iframe_api_reference#Getting_Started
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.body.appendChild(tag);
+      this.apiLoaded = true;
+    }
     this.nowPlaying.addEventListener("ended", () => {
       this.nowPlaying.currentTime = 0;
       this.next();
@@ -38,9 +48,21 @@ export class MusicplayerComponent implements OnInit {
     this.data.syncInfo = await this.http.get<MusicSyncInfo>(`http://${environment.BACKEND_URL}/sync`).toPromise();
     let currentSong = this.data.syncInfo.songQ[0];
     if (currentSong) {
-      this.nowPlaying.src = currentSong;
-      this.nowPlaying.currentTime = this.data.syncInfo.time;
-      this.nowPlaying.play();
+      this.host = this.parser.getSource(currentSong);
+      switch(this.host) {
+        case "FILE":
+          this.nowPlaying.src = currentSong;
+          this.nowPlaying.currentTime = this.data.syncInfo.time;
+          this.nowPlaying.play();
+        break;
+        case "YOUTUBE":
+          // TODO
+        break;
+
+        default:
+
+      }
+
     }
   }
 
@@ -51,10 +73,24 @@ export class MusicplayerComponent implements OnInit {
   next(): void {
     let source = this.data.syncInfo.songQ[0];
     if (source) {
+      this.host = this.parser.getSource(source);
       this.data.syncInfo.history.push(this.data.syncInfo.songQ.shift());
-      this.nowPlaying.src = source
-      this.nowPlaying.play()
+
+      switch(this.host) {
+        case "FILE":
+          this.nowPlaying.src = source
+          this.nowPlaying.play()
+        break;
+        case "YOUTUBE":
+          // TODO
+        break;
+
+        default:
+
+      }
+
       this.updateBackend();
+
     }
   }
 

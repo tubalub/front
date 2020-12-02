@@ -12,6 +12,7 @@ import { WebsocketService } from '../../services/websocket.service';
 export class UploadComponent implements OnInit {
   file = null;
   filename:string;
+  uploadURL:string = null;
 
   constructor(private http: HttpClient, public data: DataService, private wsService: WebsocketService) { }
 
@@ -21,6 +22,8 @@ export class UploadComponent implements OnInit {
   async upload() {
     let uploadUrl = await this.getPresignedUrl();
     this.http.put(uploadUrl, this.file, {observe: 'response'}).subscribe(resp => {
+      // TODO -> don't add to list when we upload an invalid file
+      // apparently AWS sends 200 even when no file is uploaded
       if(Math.floor(resp.status / 100) == 2) {
         this.data.syncInfo.songQ.push(`${environment.S3_BASE_URL}/uploads/${this.filename}`);
         this.wsService.sendMusicInfo(this.data.syncInfo);
@@ -28,7 +31,11 @@ export class UploadComponent implements OnInit {
         alert("Problem during file upload");
       }
     })
+  }
 
+  async urlUpload() {
+    this.data.syncInfo.songQ.push(this.uploadURL);
+    this.wsService.sendMusicInfo(this.data.syncInfo);
   }
 
   async getPresignedUrl() {

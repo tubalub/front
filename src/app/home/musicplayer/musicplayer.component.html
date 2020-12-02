@@ -1,8 +1,9 @@
-<!-- <button class="btn btn-primary" (click)="play()">Play</button> -->
 <button class="btn btn-primary" (click)="skip()">Skip</button>
 <button [innerHTML]='this.nowPlaying.muted ? "Unmute" : "Mute"' (click)="toggleMute()"></button>
-
+<br>
 <span>Current time: {{this.timeString}}</span>
+
+<br>
 
 <table>
     <th>Queue</th>
@@ -17,3 +18,9 @@
         <td>{{row}}</td>
     </tr>
 </table>
+
+<youtube-player *ngIf="this.host == 'YOUTUBE'"
+  videoId="GYAB4Td62zI" 
+  height="250"
+  width="500">
+</youtube-player>

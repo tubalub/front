@@ -38,6 +38,7 @@ export class WebsocketService {
   }
 
   sendMusicInfo(msg: MusicSyncInfo) {
+    console.log("sendMusicInfo invoked");
     this.stompClient.send('/app/update', {}, JSON.stringify(msg));
   }
 }

@@ -1,2 +1,7 @@
 <input type="file" id="file" accept="audio/*" name="file" (change)="onFileSelected($event)">
 <button id="uploadBtn" (click)="upload()">Upload</button>
+
+<input type="url" id="linkInput" [(ngModel)]="this.uploadURL" placeholder="Link">
+<button id="urlBtn" (click)="urlUpload()">Upload</button>
+
+<p>Test URL, remove later: {{this.uploadURL}}</p>
