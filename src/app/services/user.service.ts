@@ -10,12 +10,9 @@ import { WebsocketService } from './websocket.service';
 export class UserService {
   constructor(private data: DataService, private http: HttpClient) {}
 
-  async validateUser() {
+  async validateUser():Promise<boolean> {
     let user = sessionStorage.getItem('user');
-    if (user && (await this.getUserList()).includes(user)) {
-      return true;
-    }
-    return false;
+    return (user && (await this.getUserList()).includes(user));
   }
 
   async getUserList(): Promise<string[]> {

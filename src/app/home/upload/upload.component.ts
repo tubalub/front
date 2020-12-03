@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { ParserService } from 'src/app/services/parser.service';
 import { environment } from 'src/environments/environment';
 import { DataService } from '../../services/data.service';
 import { WebsocketService } from '../../services/websocket.service';
@@ -14,7 +15,7 @@ export class UploadComponent implements OnInit {
   filename:string;
   uploadURL:string = null;
 
-  constructor(private http: HttpClient, public data: DataService, private wsService: WebsocketService) { }
+  constructor(private http: HttpClient, public data: DataService, private wsService: WebsocketService, private parser: ParserService) { }
 
   ngOnInit(): void {
   }
@@ -36,10 +37,16 @@ export class UploadComponent implements OnInit {
   }
 
   // Updates songQ with URL directly
-  // TODO: validate URLs
   async urlUpload() {
-    this.data.syncInfo.songQ.push(this.uploadURL);
-    this.wsService.sendMusicInfo(this.data.syncInfo);
+    this.uploadURL = this.parser.checkProtocol(this.uploadURL);
+    console.log("upload url:" + this.uploadURL);
+    if (this.parser.validURL(this.uploadURL)) {
+      this.data.syncInfo.songQ.push(this.uploadURL);
+      this.wsService.sendMusicInfo(this.data.syncInfo);
+    } else {
+      alert('Invalid upload URL');
+    }
+    this.uploadURL = null;
   }
 
   async getPresignedUrl() {

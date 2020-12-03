@@ -19,10 +19,14 @@
     </tr>
 </table>
 
-<youtube-player *ngIf="this.host == 'YOUTUBE'"
-  [videoId]="this.youtubeID" 
+<!-- *ngIf="this.host == 'YOUTUBE'" -->
+<youtube-player #ytElement 
+  [videoId]="this.youtubeID"
+  [startSeconds]="this.data.syncInfo.time" 
   height="250"
-  width="500">
+  width="500"
+  [playerVars]="this.ytPlayerVars"
+  (ready)="ytReady($event)"
+  (error)="skipInvalidYT($event)"
+  style="pointer-events:none">
 </youtube-player>
-
-<span>Musicplayer HTML Test. Remove Later. YT ID: {{this.youtubeID}}</span>

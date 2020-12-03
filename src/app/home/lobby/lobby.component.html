@@ -1,4 +1,4 @@
 <table>
     <th>Users</th>
-    <tr *ngFor="let user of this.data.userList">{{user}}</tr>
+    <tr *ngFor="let user of this.data.userList.sort()">{{user}}</tr>
 </table>

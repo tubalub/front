@@ -13,8 +13,7 @@ export class HomeComponent implements OnInit {
   constructor(private userService: UserService, private router:Router) { }
 
   async ngOnInit() {
-    this.userService.getUserList;
-    if (!(this.userService.validateUser())) {
+    if (!(await this.userService.validateUser())) {
       alert("Invalid user");
       this.router.navigate(['login']);
     }
