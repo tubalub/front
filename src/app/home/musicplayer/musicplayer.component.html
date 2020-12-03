@@ -20,7 +20,9 @@
 </table>
 
 <youtube-player *ngIf="this.host == 'YOUTUBE'"
-  videoId="GYAB4Td62zI" 
+  [videoId]="this.youtubeID" 
   height="250"
   width="500">
 </youtube-player>
+
+<span>Musicplayer HTML Test. Remove Later. YT ID: {{this.youtubeID}}</span>

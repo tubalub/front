@@ -22,23 +22,25 @@ export class WebsocketService {
     this.stompClient = Stomp.over(ws);
 
     this.stompClient.connect({"username":username}, frame => {
+      // Endpoint for updates to music sync info
       this.stompClient.subscribe('/topic/music', message => {
         if (message.body) {
           this.data.musicSubj.next(JSON.parse(message.body));
         }
       });
+      // Endpoint for updates to user lists
       this.stompClient.subscribe('/topic/users', message => {
         if (message.body) {
           this.data.userSubj.next(JSON.parse(message.body));
         }
       });
+      // Tells backend to update clients upon connection
       this.stompClient.send('/app/users',{},username);
     });
     return ws;
   }
 
   sendMusicInfo(msg: MusicSyncInfo) {
-    console.log("sendMusicInfo invoked");
     this.stompClient.send('/app/update', {}, JSON.stringify(msg));
   }
 }
