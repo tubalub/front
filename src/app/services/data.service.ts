@@ -16,6 +16,8 @@ export class DataService {
 
   constructor() {
     this.musicSubj.subscribe((syncInfo) => {
+      console.log("musicsubj event")
+      console.log(syncInfo)
       this.syncInfo = syncInfo;
     });
     this.userSubj.subscribe((userList) => {

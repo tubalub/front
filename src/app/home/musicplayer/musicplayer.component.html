@@ -1,5 +1,5 @@
 <button class="btn btn-primary" (click)="skip()">Skip</button>
-<button [innerHTML]='this.nowPlaying.muted ? "Unmute" : "Mute"' (click)="toggleMute()"></button>
+<button [innerHTML]='this.isMuted ? "Unmute" : "Mute"' (click)="toggleMute()"></button>
 <br>
 <span>Current time: {{this.timeString}}</span>
 
@@ -23,10 +23,9 @@
 <youtube-player #ytElement 
   [videoId]="this.youtubeID"
   [startSeconds]="this.data.syncInfo.time" 
-  height="250"
-  width="500"
+  height="270"
+  width="480"
   [playerVars]="this.ytPlayerVars"
   (ready)="ytReady($event)"
-  (error)="skipInvalidYT($event)"
-  style="pointer-events:none">
+  (error)="skipInvalidYT($event)">
 </youtube-player>

@@ -11,7 +11,7 @@ export class UserService {
   constructor(private data: DataService, private http: HttpClient) {}
 
   async validateUser():Promise<boolean> {
-    let user = sessionStorage.getItem('user');
+    let user = sessionStorage.getItem('tubalubUser');
     return (user && (await this.getUserList()).includes(user));
   }
 
@@ -21,4 +21,5 @@ export class UserService {
       .toPromise();
     return this.data.userList;
   }
+  
 }

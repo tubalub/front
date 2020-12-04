@@ -13,13 +13,26 @@ import { YouTubePlayer } from '@angular/youtube-player';
   styleUrls: ['./musicplayer.component.css'],
 })
 export class MusicplayerComponent implements OnInit {
-  nowPlaying = new Audio();
+
+  // file
+  filePlayer = new Audio();
   timeString = '00:00.0';
   host = null;
+  isMuted: boolean = false;
+
+  // used to track if changes are uploads or skips/nexts
+  qSize:number = 0;
+  totalSize: number = 0;
 
   // youtube related
   @ViewChild('ytElement') ytPlayer: YouTubePlayer;
-  ytPlayerVars = { autoplay: 1, controls: 0 };
+  ytPlayerVars = {
+    autoplay: 1,
+    controls: 0,
+    enablejsapi: 1,
+    muted: 1,
+    modestbranding: 1,
+  };
   apiLoaded = false;
   youtubeID = null;
 
@@ -31,6 +44,10 @@ export class MusicplayerComponent implements OnInit {
   ) {}
 
   ngOnInit() {}
+
+  ngOnDestroy() {
+    
+  }
 
   async ngAfterViewInit() {
     this.initSync();
@@ -45,8 +62,8 @@ export class MusicplayerComponent implements OnInit {
       this.apiLoaded = true;
     }
     // Listeners for when song ends
-    this.nowPlaying.addEventListener('ended', () => {
-      this.nowPlaying.currentTime = 0;
+    this.filePlayer.addEventListener('ended', () => {
+      this.filePlayer.currentTime = 0;
       this.next();
     });
 
@@ -58,7 +75,7 @@ export class MusicplayerComponent implements OnInit {
 
     // Function to display current timestamp
     setInterval(() => {
-      this.timeUpdater(this.nowPlaying);
+      this.timeUpdater();
     }, 100);
 
     console.log(this.ytPlayer);
@@ -70,6 +87,8 @@ export class MusicplayerComponent implements OnInit {
       .get<MusicSyncInfo>(`http://${environment.BACKEND_URL}/sync`)
       .toPromise();
     let currentSong = this.data.syncInfo.songQ[0];
+    this.qSize = this.data.syncInfo.songQ.length;
+    this.totalSize = this.data.syncInfo.songQ.length + this.data.syncInfo.history.length; 
     if (currentSong) {
       this.host = this.parser.getSource(currentSong);
       this.play(this.host);
@@ -79,54 +98,54 @@ export class MusicplayerComponent implements OnInit {
   // Keep this for future features that require different logic for manual skips
   // e.x vote skip, displaying user actions (i.e. "Bob skipped song x")
   skip() {
+    console.log("skip called");
     this.next();
   }
 
-  // Plays next song in songQ
   next(): void {
-    if (this.host != 'FILE') {
-      // stop current embedded player
-      this.youtubeID = null;
-    }
+    // stop currently playing song
+    this.stopPlayback();
 
-    let source = this.data.syncInfo.songQ[0];
-    if (source) {
-      this.host = this.parser.getSource(source);
-      console.log("next():");
-      console.log(this.host);
+    if (this.data.syncInfo.songQ[0]) {
       this.data.syncInfo.history.push(this.data.syncInfo.songQ.shift());
-      this.play(source);
-      this.updateBackend();
+      let source = this.data.syncInfo.songQ[0];
+      if (source) {
+        this.host = this.parser.getSource(source);
+        this.play(source);
+      } 
     }
+    this.updateBackend();
   }
 
-  // Function to be called when sync info is updated from backend
   onChange() {
-    console.log('onChange');
-    // edge case when last song finishes playing
-    if (this.data.syncInfo.songQ.length == 0) {
-      // stop Audio
-      this.nowPlaying.src = undefined;
-      this.nowPlaying.currentTime = 0;
-      // stop YT
-      this.ytPlayer.videoId = null;
-      // otherwise, if we need to switch songs
-    } else if (
-      decodeURIComponent(this.nowPlaying.src) != this.data.syncInfo.songQ[0]
-    ) {
+    console.log("onChange called")
+    // two possibilities: upload/push to songQ or skip/next
+    // if number of songs hasn't changed, go next
+    // otherwise, do nothing
+    let updatedSize: number =
+      this.data.syncInfo.history.length + this.data.syncInfo.songQ.length;
+
+    // if total size hasn't changed, we know we just need to go to next song
+    let isUpload = this.totalSize != updatedSize;
+
+    // qSize used for first upload edge case
+    if (this.qSize == 0 || !isUpload) {
       try {
+        this.stopPlayback();
         this.host = this.parser.getSource(this.data.syncInfo.songQ[0]);
         this.play(this.host);
       } catch (e) {
-        console.log(e);
-        this.data.syncInfo.songQ.shift();
-        console.log(this.data.syncInfo.songQ);
-        this.updateBackend;
+        if (this.data.syncInfo.songQ.length > 0) {
+          this.data.syncInfo.songQ.shift();
+        }
       }
     }
+    this.qSize = this.data.syncInfo.songQ.length;
+    this.totalSize = updatedSize;
   }
 
   play(source: string) {
+    console.log("play called")
     switch (source) {
       case 'FILE':
         this.playFile();
@@ -142,22 +161,29 @@ export class MusicplayerComponent implements OnInit {
   }
 
   playFile() {
-    this.nowPlaying.src = this.data.syncInfo.songQ[0];
-    this.nowPlaying.currentTime = this.data.syncInfo.time;
-    this.nowPlaying.play();
+    this.filePlayer.src = this.data.syncInfo.songQ[0];
+    this.filePlayer.currentTime = this.data.syncInfo.time;
+    this.filePlayer.play();
   }
 
   playYT() {
-    console.log('playYT called for:');
+    console.log("playyt called")
     this.youtubeID = this.parser.getYoutubeID(this.data.syncInfo.songQ[0]);
-    console.log(this.youtubeID);
     this.youtubeID
       ? this.ytPlayer.playVideo()
       : this.skipInvalidYT(this.youtubeID);
   }
 
+  stopPlayback() {
+    this.filePlayer.src = null;
+    this.filePlayer.currentTime = 0;
+
+    this.ytPlayer.stopVideo();
+    this.ytPlayer.videoId = null;
+    this.data.syncInfo.time = 0;
+  }
+
   skipInvalidYT(event) {
-    console.log(event);
     // TODO: replace with actual output
     console.log(`Error playing Youtube video (${this.youtubeID}). Skipping...`);
     this.data.syncInfo.songQ.shift();
@@ -166,34 +192,39 @@ export class MusicplayerComponent implements OnInit {
   }
 
   updateBackend() {
-    this.data.syncInfo.time = this.nowPlaying.currentTime;
-    console.log('Updating backend with:');
-    console.log(this.data.syncInfo);
+    switch (this.host) {
+      case 'FILE':
+        this.data.syncInfo.time = this.filePlayer.currentTime;
+        break;
+      case 'YOUTUBE':
+        this.data.syncInfo.time = this.ytPlayer.getCurrentTime();
+    }
     this.wsService.sendMusicInfo(this.data.syncInfo);
   }
 
   toggleMute() {
-    this.nowPlaying.muted = !this.nowPlaying.muted;
+    this.isMuted = !this.isMuted;
+    this.filePlayer.muted = !this.filePlayer.muted;
     this.ytPlayer.isMuted() ? this.ytPlayer.unMute() : this.ytPlayer.mute();
   }
 
-  timeUpdater(audio: HTMLAudioElement) {
+  timeUpdater() {
     let time = new Date(0);
     switch (this.host) {
       case 'FILE':
-        if (audio.src) {
-          time.setMilliseconds(this.nowPlaying.currentTime * 1000);
+        if (this.filePlayer.src) {
+          time.setMilliseconds(this.filePlayer.currentTime * 1000);
         }
         break;
       case 'YOUTUBE':
-        time.setMilliseconds(this.ytPlayer.getCurrentTime()*1000);
+        time.setMilliseconds(this.ytPlayer.getCurrentTime() * 1000);
         break;
     }
     this.timeString = time.toISOString().substr(14, 7);
-
   }
 
   ytReady(event) {
     event.target.playVideo();
   }
+
 }

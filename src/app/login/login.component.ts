@@ -20,7 +20,7 @@ export class LoginComponent implements OnInit {
   async login() {
     if (this.username) {
       // Get list of already connected users to prevent duplicates
-      sessionStorage.setItem('user',this.username);
+      sessionStorage.setItem('tubalubUser',this.username);
       let userlist = await this.userService.getUserList();
       if(!userlist.includes(this.username)) {
         console.log("userlist in login:"+userlist);

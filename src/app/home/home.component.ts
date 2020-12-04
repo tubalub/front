@@ -1,6 +1,5 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { environment } from 'src/environments/environment';
 import { UserService } from '../services/user.service';
 
 @Component({
@@ -14,7 +13,7 @@ export class HomeComponent implements OnInit {
 
   async ngOnInit() {
     if (!(await this.userService.validateUser())) {
-      alert("Invalid user");
+      alert("Session disconnected. Sign back in");
       this.router.navigate(['login']);
     }
   }
